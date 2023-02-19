@@ -1,0 +1,30 @@
+#define LED_PIN 13
+#define BIT_TIME 1000 // time in microseconds for each bit
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // read a byte of data from the serial port
+  if (Serial.available()) {
+    byte data = Serial.read();
+
+    // transmit the byte of data via the LED
+    digitalWrite(LED_PIN, LOW); // start bit (always 0)
+    delayMicroseconds(BIT_TIME);
+
+    for (int i = 0; i < 8; i++) {
+      if (data & (1 << i)) {
+        digitalWrite(LED_PIN, HIGH);
+      } else {
+        digitalWrite(LED_PIN, LOW);
+      }
+      delayMicroseconds(BIT_TIME);
+    }
+
+    digitalWrite(LED_PIN, HIGH); // stop bit (always 1)
+    delayMicroseconds(BIT_TIME);
+  }
+}
