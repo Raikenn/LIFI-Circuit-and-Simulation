@@ -1,36 +1,36 @@
 #include "ns3/core-module.h"
-#include "ns3/lifi-module.h"
+#include "ns3/vlc-module.h"
 #include "ns3/internet-module.h"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("SimpleLifiNetwork");
+NS_LOG_COMPONENT_DEFINE("SimpleVlcNetwork");
 
 int main(int argc, char *argv[]) {
 
-  LogComponentEnable("SimpleLifiNetwork", LOG_LEVEL_INFO);
+  LogComponentEnable("SimpleVlcNetwork", LOG_LEVEL_INFO);
 
   // Create two nodes
   NodeContainer nodes;
   nodes.Create(2);
 
-  // Create a LIFI channel
-  LiFiChannelHelper channel;
+  // Create a VLC channel
+  VlcChannelHelper channel;
   channel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
-  channel.AddPropagationLoss("ns3::LiFiPropagationLossModel");
-  Ptr<LiFiChannel> lifiChannel = channel.Create();
+  channel.AddPropagationLoss("ns3::VlcPropagationLossModel");
+  Ptr<VlcChannel> vlcChannel = channel.Create();
 
-  // Create LIFI devices for each node
-  LiFiHelper lifi;
-  Ptr<LiFiNetDevice> lifiDevice1 = lifi.Install(nodes.Get(0), lifiChannel);
-  Ptr<LiFiNetDevice> lifiDevice2 = lifi.Install(nodes.Get(1), lifiChannel);
+  // Create VLC devices for each node
+  VlcHelper vlc;
+  Ptr<VlcTxNetDevice> txDevice = vlc.Install(nodes.Get(0), vlcChannel);
+  Ptr<VlcRxNetDevice> rxDevice = vlc.Install(nodes.Get(1), vlcChannel);
 
   // Assign IP addresses to the devices
   InternetStackHelper internet;
   internet.Install(nodes);
   Ipv4AddressHelper address;
   address.SetBase("10.1.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer interfaces = address.Assign(lifiDevices);
+  Ipv4InterfaceContainer interfaces = address.Assign(TxDevice);
 
   // Create a simple application to send data from node 0 to node 1
   uint16_t port = 9;
