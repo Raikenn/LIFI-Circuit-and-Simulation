@@ -1,0 +1,51 @@
+#include "ns3/core-module.h"
+#include "ns3/lifi-module.h"
+#include "ns3/internet-module.h"
+
+using namespace ns3;
+
+NS_LOG_COMPONENT_DEFINE("SimpleLifiNetwork");
+
+int main(int argc, char *argv[]) {
+
+  LogComponentEnable("SimpleLifiNetwork", LOG_LEVEL_INFO);
+
+  // Create two nodes
+  NodeContainer nodes;
+  nodes.Create(2);
+
+  // Create a LIFI channel
+  LiFiChannelHelper channel;
+  channel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
+  channel.AddPropagationLoss("ns3::LiFiPropagationLossModel");
+  Ptr<LiFiChannel> lifiChannel = channel.Create();
+
+  // Create LIFI devices for each node
+  LiFiHelper lifi;
+  Ptr<LiFiNetDevice> lifiDevice1 = lifi.Install(nodes.Get(0), lifiChannel);
+  Ptr<LiFiNetDevice> lifiDevice2 = lifi.Install(nodes.Get(1), lifiChannel);
+
+  // Assign IP addresses to the devices
+  InternetStackHelper internet;
+  internet.Install(nodes);
+  Ipv4AddressHelper address;
+  address.SetBase("10.1.1.0", "255.255.255.0");
+  Ipv4InterfaceContainer interfaces = address.Assign(lifiDevices);
+
+  // Create a simple application to send data from node 0 to node 1
+  uint16_t port = 9;
+  OnOffHelper onoff("ns3::UdpSocketFactory", InetSocketAddress(interfaces.GetAddress(1), port));
+  onoff.SetAttribute("PacketSize", UintegerValue(1024));
+  onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
+  onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+
+  ApplicationContainer apps = onoff.Install(nodes.Get(0));
+  apps.Start(Seconds(1.0));
+  apps.Stop(Seconds(10.0));
+
+  // Run the simulation
+  Simulator::Run();
+  Simulator::Destroy();
+
+  return 0;
+}
