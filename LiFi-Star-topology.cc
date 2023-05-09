@@ -4,11 +4,11 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("SimpleVlcNetwork");
+NS_LOG_COMPONENT_DEFINE("LiFiStarTopologyNetwork");
 
 int main(int argc, char *argv[]) {
 
-  LogComponentEnable("SimpleVlcNetwork", LOG_LEVEL_INFO);
+  LogComponentEnable("LiFiStarTopologyNetwork", LOG_LEVEL_INFO);
 
   // Create the server node
   NodeContainer serverNode;
@@ -18,15 +18,19 @@ int main(int argc, char *argv[]) {
   NodeContainer clientNodes;
   clientNodes.Create(6);
 
-  // Create a VLC channel
+  // Create the VLC channel
   VlcChannelHelper channel;
   channel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
   channel.AddPropagationLoss("ns3::VlcPropagationLossModel");
+  //specify the modulation type
+  channel.SetMode("OOK");
   Ptr<VlcChannel> vlcChannel = channel.Create();
 
-  // Install VLC devices for the server and the clients
+  
   VlcHelper vlc;
+  // Install VLC devices for the server
   Ptr<VlcRxNetDevice> serverRxDevice = vlc.Install(serverNode.Get(0), vlcChannel);
+   // Install VLC devices Client devices
   Ptr<VlcTxNetDevice> client1TxDevice = vlc.Install(clientNodes.Get(0), vlcChannel);
   Ptr<VlcTxNetDevice> client2TxDevice = vlc.Install(clientNodes.Get(1), vlcChannel);
   Ptr<VlcTxNetDevice> client3TxDevice = vlc.Install(clientNodes.Get(2), vlcChannel);
@@ -34,7 +38,7 @@ int main(int argc, char *argv[]) {
   Ptr<VlcTxNetDevice> client5TxDevice = vlc.Install(clientNodes.Get(4), vlcChannel);
   Ptr<VlcTxNetDevice> client6TxDevice = vlc.Install(clientNodes.Get(5), vlcChannel);
 
-  // Assign IP addresses to the devices
+  // Assign IP addresses 
   InternetStackHelper internet;
   internet.InstallAll();
 
@@ -51,7 +55,7 @@ int main(int argc, char *argv[]) {
   Ipv4InterfaceContainer client5Interfaces = clientAddress.Assign(client5TxDevice);
   Ipv4InterfaceContainer client6Interfaces = clientAddress.Assign(client6TxDevice);
 
-  // Create a simple application to send data from each client to the server
+  // Create a application to send data from each client to the server
   uint16_t port = 9;
 
   for (uint32_t i = 0; i < clientNodes.GetN(); ++i) {
@@ -60,4 +64,14 @@ int main(int argc, char *argv[]) {
     onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
     onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
 
-    ApplicationContainer apps = onoff.Install(clientNodes.Get
+    ApplicationContainer apps = onoff.Install(clientNodes.Get(0));
+    apps.Start(Seconds(1.0));
+    apps.Stop(Seconds(10.0));
+                                              
+    // Run the simulation
+    Simulator::Run();
+    Simulator::Destroy();
+ 
+  return 0;
+  
+                                              
