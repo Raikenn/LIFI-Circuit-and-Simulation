@@ -1,5 +1,8 @@
+// the Pin which the sensor is attached to
 #define SENSOR_PIN A0
-#define BIT_TIME 1000 // time in microseconds for each bit
+
+// time in microseconds for each bit
+#define BIT_TIME 1000 
 
 void setup() {
   Serial.begin(9600);
@@ -21,6 +24,6 @@ void loop() {
   while (analogRead(SENSOR_PIN) < 512) {}
   delayMicroseconds(BIT_TIME / 2);
 
-  // print the received byte of data
+  // print the received byte 
   Serial.write(data);
 }
