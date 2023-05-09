@@ -1,5 +1,8 @@
+// Digital Pin containing the LED
 #define LED_PIN 13
-#define BIT_TIME 1000 // time in microseconds for each bit
+
+// time in microseconds for each bit
+#define BIT_TIME 1000 
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
@@ -16,15 +19,15 @@ void loop() {
     delayMicroseconds(BIT_TIME);
 
     for (int i = 0; i < 8; i++) {
-      if (data & (1 << i)) {
-        digitalWrite(LED_PIN, HIGH);
+         if (data & (1 << i)) {
+             digitalWrite(LED_PIN, HIGH);
       } else {
-        digitalWrite(LED_PIN, LOW);
+             digitalWrite(LED_PIN, LOW);
       }
-      delayMicroseconds(BIT_TIME);
+             delayMicroseconds(BIT_TIME);
     }
-
-    digitalWrite(LED_PIN, HIGH); // stop bit (always 1)
+    // stop bit (always 1)
+    digitalWrite(LED_PIN, HIGH); 
     delayMicroseconds(BIT_TIME);
   }
 }
