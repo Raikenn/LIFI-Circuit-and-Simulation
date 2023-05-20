@@ -1,18 +1,24 @@
 // LiFi Receiver Arduino Code
 
 int sensorPin = A0;  // Photodiode sensor connected to analog pin A0
+const int threshold = 500;  // Adjust the threshold value as per your environment
+const char startSymbol = '!';  // Start symbol to synchronize data reception
 
 void setup() {
   Serial.begin(9600);  // Initialize serial communication
 }
 
 void loop() {
-  int sensorValue = analogRead(sensorPin);  // Read the sensor value
   static bool isReceiving = false;
   static String receivedData = "";
 
-  if (sensorValue > 500) {  // Adjust the threshold value as per your environment
-    isReceiving = true;
+  int sensorValue = analogRead(sensorPin);  // Read the sensor value
+
+  if (!isReceiving && sensorValue > threshold) {
+    char receivedChar = Serial.read();
+    if (receivedChar == startSymbol) {
+      isReceiving = true;
+    }
   }
 
   if (isReceiving) {
@@ -30,3 +36,6 @@ void loop() {
 
   delay(10);
 }
+
+
+
