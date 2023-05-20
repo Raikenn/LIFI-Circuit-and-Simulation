@@ -11,19 +11,25 @@ void setup() {
 void loop() {
   static bool isReceiving = false;
   static String receivedData = "";
+  static bool isStartSymbolReceived = false;
+  static bool isHalfSymbol = false;
 
   int sensorValue = analogRead(sensorPin);  // Read the sensor value
 
   if (!isReceiving && sensorValue > threshold) {
     char receivedChar = Serial.read();
-    if (receivedChar == startSymbol) {
+    if (!isStartSymbolReceived && receivedChar == startSymbol) {
+      isStartSymbolReceived = true;
+    } else if (isStartSymbolReceived) {
       isReceiving = true;
+      receivedData = "";
+      isStartSymbolReceived = false;
     }
   }
 
   if (isReceiving) {
-    char receivedChar = Serial.read();
-    if (receivedChar != -1) {
+    char receivedChar = decodeManchester();
+    if (receivedChar != '\0') {
       if (receivedChar == '\n') {
         isReceiving = false;
         Serial.println("Received Data: " + receivedData);
@@ -37,5 +43,33 @@ void loop() {
   delay(10);
 }
 
+char decodeManchester() {
+  static bool previousLevel = LOW;
+  static bool isDataBit = false;
+  static unsigned long previousTime = 0;
+
+  int sensorValue = analogRead(sensorPin);  // Read the sensor value
+  bool currentLevel = (sensorValue > threshold);
+
+  unsigned long currentTime = micros();
+  unsigned long halfSymbolDuration = currentTime - previousTime;
+  previousTime = currentTime;
+
+  if (currentLevel != previousLevel) {
+    previousLevel = currentLevel;
+    isDataBit = !isDataBit;
+    return '\0';  // Return null character to indicate no valid data received
+  }
+
+  if (isDataBit) {
+    if (halfSymbolDuration > 1.2 * 100) {
+      return '1';
+    } else if (halfSymbolDuration < 0.8 * 100) {
+      return '0';
+    }
+  }
+
+  return '\0';  // Return null character to indicate no valid data received
+}
 
 
