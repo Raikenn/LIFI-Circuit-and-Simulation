@@ -8,23 +8,25 @@ void setup() {
 
 void loop() {
   int sensorValue = analogRead(sensorPin);  // Read the sensor value
-  if (sensorValue > 500) {  // Adjust the threshold value as per your environment
-    String receivedData = readLiFiData();
-    if (!receivedData.isEmpty()) {
-      Serial.println("Received Data: " + receivedData);
-    }
-  }
-  delay(100);
-}
+  static bool isReceiving = false;
+  static String receivedData = "";
 
-String readLiFiData() {
-  String data = "";
-  while (Serial.available()) {
-    char c = Serial.read();
-    if (c == '\n') {
-      break;
-    }
-    data += c;
+  if (sensorValue > 500) {  // Adjust the threshold value as per your environment
+    isReceiving = true;
   }
-  return data;
+
+  if (isReceiving) {
+    char receivedChar = Serial.read();
+    if (receivedChar != -1) {
+      if (receivedChar == '\n') {
+        isReceiving = false;
+        Serial.println("Received Data: " + receivedData);
+        receivedData = "";
+      } else {
+        receivedData += receivedChar;
+      }
+    }
+  }
+
+  delay(10);
 }
