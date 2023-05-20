@@ -1,0 +1,43 @@
+const int sensorPin = A0; // Analog input pin for the sensor
+int sensorValue = 0;      // Initialize sensor value
+
+void setup() {
+  pinMode(ledPin, OUTPUT); // Set LED pin as output
+  Serial.begin(9600); // Start serial communication
+  Serial.println("Ready to receive data...");
+}
+
+void loop() {
+  sensorValue = analogRead(sensorPin); // Read voltage from sensor pin
+  if (sensorValue > threshold) { // If LED is on
+    // Read data from LED and process it
+    int data = readData();
+    Serial.print("Data byte: ");
+    Serial.print(data, BIN);
+    Serial.print(" (");
+    Serial.print(data);
+    Serial.println(")");
+    Serial.print("Data rate: ");
+    Serial.print((float)8/pulseWidth);
+    Serial.println(" bits/ms");
+    Serial.print("Signal strength: ");
+    Serial.print(sensorValue);
+    Serial.println(" (out of 1023)");
+    Serial.println();
+  }
+}
+
+int readData() {
+  int data = 0;
+  for (int i = 0; i < 8; i++) {
+    // Read each bit of the data byte by measuring the LED
+    digitalWrite(ledPin, HIGH);
+    delayMicroseconds(pulseWidth);
+    int bitValue = analogRead(sensorPin) > threshold ? 1 : 0;
+    digitalWrite(ledPin, LOW);
+    delayMicroseconds(pulseWidth);
+    // Add the bit to the data byte
+    data = (data << 1) | bitValue;
+  }
+  return data;
+}
