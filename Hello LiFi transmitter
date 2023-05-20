@@ -26,13 +26,21 @@ void sendLiFiData(String data) {
 
 void sendLiFiChar(char c) {
   Serial.print(c);
-  for (int i = 0; i < 8; i++) {
-    if (c & (1 << i)) {
+  
+  // Manchester encoding
+  for (int i = 7; i >= 0; i--) {
+    int bit = (c >> i) & 1;
+    if (bit) {
       digitalWrite(ledPin, HIGH);  // Turn on LED for transmitting a '1'
+      delay(100);  // Delay for half a symbol duration
+      digitalWrite(ledPin, LOW);  // Turn off LED
+      delay(100);  // Delay for half a symbol duration
     } else {
       digitalWrite(ledPin, LOW);  // Turn off LED for transmitting a '0'
+      delay(100);  // Delay for half a symbol duration
+      digitalWrite(ledPin, HIGH);  // Turn on LED
+      delay(100);  // Delay for half a symbol duration
     }
-    delay(100);  // Delay for symbol duration
   }
 }
 
