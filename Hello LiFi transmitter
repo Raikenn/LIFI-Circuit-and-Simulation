@@ -1,6 +1,7 @@
 // LiFi Transmitter Arduino Code
 
 int ledPin = 13;  // LED connected to digital pin 13
+const char startSymbol = '!';  // Start symbol to synchronize data reception
 
 void setup() {
   pinMode(ledPin, OUTPUT);  // Set LED pin as output
@@ -9,7 +10,7 @@ void setup() {
 
 void loop() {
   String dataToSend = "Hello, LiFi!";  // Data to be transmitted
-  sendLiFiData(dataToSend);
+  sendLiFiData(startSymbol + dataToSend);
   delay(2000);  // Delay between transmissions
 }
 
@@ -34,3 +35,6 @@ void sendLiFiChar(char c) {
     delay(100);  // Delay for symbol duration
   }
 }
+
+
+
