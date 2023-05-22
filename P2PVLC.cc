@@ -4,9 +4,13 @@
 #include "ns3/point-to-point-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/ipv4-global-routing-helper.h"
-#include "ns3/vlc-module.h"
+#include "ns3/vlcnew.h"
+#include "vlcChannelHelper.h"
+#include "vlcDeviceHelper.h"
 
 using namespace ns3;
+using namespace std;
+using namespace vlc;
 
 int main (int argc, char *argv[])
 {
@@ -19,10 +23,9 @@ int main (int argc, char *argv[])
   nodes.Create (2);
 
   // Install VLC devices
-  VlcHelper vlcHelper;
-  VlcChannelHelper vlcChannelHelper;
+  vlcChannelHelper vlcChannelHelper;
   vlcChannelHelper.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  vlcChannelHelper.AddPropagationLoss ("ns3::LogDistancePropagationLossModel");
+  vlcChannelHelper.SetPropagationLoss ("ns3::LogDistancePropagationLossModel");
   vlcChannelHelper.SetPathlossModel ("ns3::FixedPathLossModel");
   vlcChannelHelper.Install (nodes);
 
@@ -40,19 +43,19 @@ int main (int argc, char *argv[])
   Ipv4InterfaceContainer interfaces = address.Assign (devices);
 
   // Create transmitter
-  Ptr<VlcTransmitter> transmitter = CreateObject<VlcTransmitter> ();
-  transmitter->SetPosition (0.0, 0.0, 1.5); // Set transmitter position (x, y, z)
-  transmitter->SetSpectrumModel ("ns3::ConstantSpectrumModel");
-  transmitter->SetSignalPower (1.0); // Set signal power (in Watts)
+  Ptr<vlc_NetDeviceTX> transmitter = CreateObject<vlc_NetDeviceTX> ();
+  transmitter.SetPosition (0.0, 0.0, 1.5); // Set transmitter position (x, y, z)
+  transmitter.SetSpectrumModel ("ns3::ConstantSpectrumModel");
+  transmitter.SetSignalPower (1.0); // Set signal power (in Watts)
 
   // Create receiver
-  Ptr<VlcReceiver> receiver = CreateObject<VlcReceiver> ();
-  receiver->SetPosition (10.0, 0.0, 1.5); // Set receiver position (x, y, z)
+  Ptr<vlc_NetDeviceRX> receiver = CreateObject<vlc_NetDeviceRX> ();
+  receiver.SetPosition (10.0, 0.0, 1.5); // Set receiver position (x, y, z)
 
   // Connect transmitter and receiver
-  Ptr<VlcChannel> channel = vlcChannelHelper.GetChannel (0);
-  transmitter->SetChannel (channel);
-  receiver->SetChannel (channel);
+  Ptr<VLCPropagationLossModel> channel = vlcChannelHelper.GetChannel (0);
+  transmitter.SetChannel (channel);
+  receiver.SetChannel (channel);
 
   // Set up applications
   OnOffHelper onOffHelper ("ns3::UdpSocketFactory", Address ());
@@ -67,7 +70,7 @@ int main (int argc, char *argv[])
   appContainer.Stop (Seconds (10.0));
 
   // Enable packet capture for receiver
-  receiver->EnablePacketCapture ("vlc-receiver.pcap", Seconds (1.0));
+  receiver.EnablePacketCapture ("vlc-receiver.pcap", Seconds (1.0));
 
  // Run simulation
   Simulator::Stop (Seconds (10.0));
