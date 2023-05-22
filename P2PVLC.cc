@@ -66,16 +66,10 @@ int main (int argc, char *argv[])
   appContainer.Start (Seconds (1.0));
   appContainer.Stop (Seconds (10.0));
 
-  // Set up tracing
-  Ptr<OutputStreamWrapper> txStream = Create<OutputStreamWrapper> ("vlc-transmitter.tr", std::ios::out);
-  Ptr<OutputStreamWrapper> rxStream = Create<OutputStreamWrapper> ("vlc-receiver.tr", std::ios::out);
-  transmitter->TraceConnectWithoutContext ("TxPower", MakeBoundCallback (&VlcHelper::TraceCallback, &vlcHelper, txStream));
-  receiver->TraceConnectWithoutContext ("RxPower", MakeBoundCallback (&VlcHelper::TraceCallback, &vlcHelper, rxStream));
-
   // Enable packet capture for receiver
   receiver->EnablePacketCapture ("vlc-receiver.pcap", Seconds (1.0));
 
-  // Run simulation
+ // Run simulation
   Simulator::Stop (Seconds (10.0));
   Simulator::Run ();
   Simulator::Destroy ();
